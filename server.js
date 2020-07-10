@@ -94,3 +94,79 @@ function addDept(){
   });
   })
 }
+
+function addRole(){
+    connection.query("SELECT * FROM departments", (err, data) => {
+      if (err) throw err;
+      const departmentsArray = data.map((object)=> object.department_name)
+      // console.log(data.map((object)=> object.id));
+      inquirer.prompt([
+          {
+              type: "list",
+              choices: departmentsArray,
+              name: "department",
+              message: "Which department will this new role be added to?"
+          },
+          {
+            type: "input",
+            name: "title",
+            message: "What is the name of the new role?"
+          },
+          {
+            type: "input",
+              name: "salary",
+              message: "What will the salary for this new role be? (do not use commas or special characters)"
+          }
+      ]).then((answer)=>{
+        let department = data.filter(
+        (object) => object.department_name === answer.department);
+       const queryString =
+      "INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)";
+      connection.query(queryString, [answer.title, answer.salary, department[0].id], function (err,  data) {
+      if (err) throw err;
+      const query = "SELECT * FROM roles";
+      connection.query(query, function(err, role){
+        if (err) throw err
+        console.log(`Your new role has been added!`);
+        console.table(role)
+      })
+      })
+    })})}
+
+    function addEmployee(){
+        connection.query("SELECT * FROM roles", (err, dataRole) => {
+          if (err) throw err;
+          const rolesArray = dataRole.map((object)=> object.title)
+        inquirer.prompt([
+  
+            {
+              type: "list",
+              choices: rolesArray,
+              name: "title",
+              message: "Which role will this new employee have?"
+          },
+          {
+              type: "input",
+              name: "name",
+              message: "Enter the employee's First Name:"
+          },
+          {
+              type: "input",
+              name: "lastName",
+              message: "Enter the employee's Last Name:"
+          }
+        ]).then((answer)=>{
+          let role = dataRole.filter(
+          (object) => object.title=== answer.title);
+         const queryString =
+        "INSERT INTO employee (first_name, last_name, roles_id, manager_id) VALUES (?, ?, ?, ?)";
+        connection.query(queryString, [answer.name, answer.lastName, role[0].id, 1], function (err,  data) {
+        if (err) throw err;
+        const query = "SELECT * FROM employee";
+        connection.query(query, function(err, employee){
+          if (err) throw err
+          console.log(`Your new employee has been added!`);
+          console.table(employee)
+        })
+        })
+      })})}
