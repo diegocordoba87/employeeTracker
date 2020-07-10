@@ -1,4 +1,5 @@
 const mysql = require("mysql");
+const inquirer = require("inquirer")
 
 
 const connection = mysql.createConnection({
@@ -99,7 +100,7 @@ function addRole(){
     connection.query("SELECT * FROM departments", (err, data) => {
       if (err) throw err;
       const departmentsArray = data.map((object)=> object.department_name)
-      // console.log(data.map((object)=> object.id));
+      console.log(departmentsArray)
       inquirer.prompt([
           {
               type: "list",
@@ -137,6 +138,12 @@ function addRole(){
         connection.query("SELECT * FROM roles", (err, dataRole) => {
           if (err) throw err;
           const rolesArray = dataRole.map((object)=> object.title)
+          connection.query(`SELECT id, first_name, last_name FROM employee`, (err, employees) => {
+            if (err) throw err;
+
+            console.log(employees);
+            const employeesArray = employees.map((object)=> object.last_name);
+            console.log(employeesArray)
         inquirer.prompt([
   
             {
@@ -157,16 +164,20 @@ function addRole(){
           },
           {
             type: "list",
-            choices: rolesArray,
-            name: "title",
+            choices: employeesArray,
+            name: "manager",
             message: "Who is the employee's manager?"
           }
         ]).then((answer)=>{
+            console.log(answer)
           let role = dataRole.filter(
           (object) => object.title=== answer.title);
+          let manager = employees.filter(
+              (object) => object.manager = answer.manager)
+              console.log(manager)         
          const queryString =
-        "INSERT INTO employee (first_name, last_name, roles_id, manager_id) VALUES (?, ?, ?, ?)";
-        connection.query(queryString, [answer.name, answer.lastName, role[0].id, 1], function (err,  data) {
+        "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)";
+        connection.query(queryString, [answer.name, answer.lastName, role[0].id, manager[0].id], function (err,  data) {
         if (err) throw err;
         const query = "SELECT * FROM employee";
         connection.query(query, function(err, employee){
@@ -175,4 +186,4 @@ function addRole(){
           console.table(employee)
         })
         })
-      })})}
+      })})})}
