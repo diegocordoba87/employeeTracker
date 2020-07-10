@@ -76,3 +76,21 @@ connection.connect(function(err) {
       }
     });
 }
+
+function addDept(){
+    inquirer.prompt([
+        {type: 'input',
+        name: "newDept",
+        message: "Provide name of the department you wish to add"
+    }
+    ]).then(({newDept})=>{
+    const queryString =
+    "INSERT INTO departments (`department_name`) VALUES ('?');";
+    connection.query(queryString, [newDept], function (err,  data) {
+    if (err) throw err;
+    console.log(newDept + 'has been added!')
+    console.table(data);
+    init();
+  });
+  })
+}
