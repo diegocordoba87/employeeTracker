@@ -10,7 +10,9 @@ values ('Marketing'),
 ('Sales'),
 ('Customer Service');
 
-insert into employee (first_name, last_name, roles_id)
+SELECT * FROM humanResources.employee;
+
+insert into employee (first_name, last_name, role_id)
 values ('Bezalel','Simmel', 1),
 ('Parto','Bamford', 1),
 ('Chirstian','Koblick', 2),
@@ -25,19 +27,19 @@ values ('Bezalel','Simmel', 1),
 
 UPDATE employee
 SET manager_id = 2
-WHERE roles_id = 1;
+WHERE role_id = 1;
 
 UPDATE employee
 SET manager_id = 3
-WHERE roles_id = 2;
+WHERE role_id = 2;
 
 UPDATE employee
 SET manager_id = 5
-WHERE roles_id = 3;
+WHERE role_id = 3;
 
 UPDATE employee
 SET manager_id = 9
-WHERE roles_id = 4;
+WHERE role_id = 4;
 
 
 UPDATE employee
