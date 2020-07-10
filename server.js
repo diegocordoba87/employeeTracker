@@ -40,9 +40,9 @@ function init() {
       if (action === "Add departments, roles or employees") {
         addToDB();
       } else if (action === "View departments, roles or employees") {
-        searchBySong();
+        viewDB();
       } else if (action === "Update departments, roles or employees") {
-        searchForRepeats();
+        updateDB();
       } else {
         exit();
       }
@@ -71,6 +71,29 @@ function addToDB() {
       }
     });
 }
+
+function viewDB() {
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          choices: ["View the departments table", "View the roles table", "View the employees table", "Exit"],
+          name: "action",
+          message: "What would you like to do?",
+        },
+      ])
+      .then(({ action }) => {
+        if (action === "View the departments table") {
+          viewDept();
+        } else if (action === "View the roles table") {
+          viewRole();
+        } else if (action === "View the employees table") {
+          viewEmployee();
+        } else {
+          exit();
+        }
+      });
+  }
 
 function addDept() {
   inquirer
@@ -217,7 +240,7 @@ function addMore() {
         type: "list",
         choices: ["Yes", "No"],
         name: "action",
-        message: "Would you like to make more changes to the database?",
+        message: "Would you like to look at the option again?",
       },
     ])
     .then(({ action }) => {
@@ -228,6 +251,18 @@ function addMore() {
       }
     });
 }
+
+function viewDept(){
+    const queryString =
+        "SELECT * FROM departments";
+      connection.query(queryString, function (err, data) {
+        if (err) throw err;
+        console.table(data);
+        addMore();
+})
+}
+
+
 
 function exit(){
     connection.end()
