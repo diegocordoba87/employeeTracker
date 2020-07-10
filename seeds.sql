@@ -25,4 +25,33 @@ values ('Bezalel','Simmel', 1),
 
 UPDATE employee
 SET manager_id = 2
-WHERE id != 2;
+WHERE roles_id = 1;
+
+UPDATE employee
+SET manager_id = 3
+WHERE roles_id = 2;
+
+UPDATE employee
+SET manager_id = 5
+WHERE roles_id = 3;
+
+UPDATE employee
+SET manager_id = 9
+WHERE roles_id = 4;
+
+
+UPDATE employee
+SET manager_id = null
+WHERE id = 2;
+
+UPDATE employee
+SET manager_id = null
+WHERE id = 3;
+
+UPDATE employee
+SET manager_id = null
+WHERE id = 5;
+
+UPDATE employee
+SET manager_id = null
+WHERE id = 9;
