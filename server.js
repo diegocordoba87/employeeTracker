@@ -48,3 +48,31 @@ connection.connect(function(err) {
         }
       });
   }
+
+  function addToDB() {
+    inquirer
+    .prompt([
+      {
+        type: "list",
+        choices: [
+          "Add department",
+          "Add role",
+          "Add employee",
+          "Exit",
+        ],
+        name: "action",
+        message: "What would you like to do?",
+      },
+    ])
+    .then(({ action }) => {
+      if (action === "Add department") {
+        addDept();
+      } else if (action === "Add role") {
+        addRole();
+      } else if (action === "Add employee") {
+        addEmployee();
+      } else {
+        exit();
+      }
+    });
+}
