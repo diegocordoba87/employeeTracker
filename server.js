@@ -132,3 +132,41 @@ function addRole(){
       })
       })
     })})}
+
+    function addEmployee(){
+        connection.query("SELECT * FROM roles", (err, dataRole) => {
+          if (err) throw err;
+          const rolesArray = dataRole.map((object)=> object.title)
+        inquirer.prompt([
+  
+            {
+              type: "list",
+              choices: rolesArray,
+              name: "title",
+              message: "Which role will this new employee have?"
+          },
+          {
+              type: "input",
+              name: "name",
+              message: "Enter the employee's First Name:"
+          },
+          {
+              type: "input",
+              name: "lastName",
+              message: "Enter the employee's Last Name:"
+          }
+        ]).then((answer)=>{
+          let role = dataRole.filter(
+          (object) => object.title=== answer.title);
+         const queryString =
+        "INSERT INTO employee (first_name, last_name, roles_id, manager_id) VALUES (?, ?, ?, ?)";
+        connection.query(queryString, [answer.name, answer.lastName, role[0].id, 1], function (err,  data) {
+        if (err) throw err;
+        const query = "SELECT * FROM employee";
+        connection.query(query, function(err, employee){
+          if (err) throw err
+          console.log(`Your new employee has been added!`);
+          console.table(employee)
+        })
+        })
+      })})}
