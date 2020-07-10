@@ -94,3 +94,41 @@ function addDept(){
   });
   })
 }
+
+function addRole(){
+    connection.query("SELECT * FROM departments", (err, data) => {
+      if (err) throw err;
+      const departmentsArray = data.map((object)=> object.department_name)
+      // console.log(data.map((object)=> object.id));
+      inquirer.prompt([
+          {
+              type: "list",
+              choices: departmentsArray,
+              name: "department",
+              message: "Which department will this new role be added to?"
+          },
+          {
+            type: "input",
+            name: "title",
+            message: "What is the name of the new role?"
+          },
+          {
+            type: "input",
+              name: "salary",
+              message: "What will the salary for this new role be? (do not use commas or special characters)"
+          }
+      ]).then((answer)=>{
+        let department = data.filter(
+        (object) => object.department_name === answer.department);
+       const queryString =
+      "INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)";
+      connection.query(queryString, [answer.title, answer.salary, department[0].id], function (err,  data) {
+      if (err) throw err;
+      const query = "SELECT * FROM roles";
+      connection.query(query, function(err, role){
+        if (err) throw err
+        console.log(`Your new role has been added!`);
+        console.table(role)
+      })
+      })
+    })})}
