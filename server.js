@@ -1,5 +1,5 @@
 const mysql = require("mysql");
-const inquirer = require ("inquirer");
+
 
 const connection = mysql.createConnection({
   host: "localhost",
@@ -20,3 +20,31 @@ connection.connect(function(err) {
     console.log("connected as id"+ connection.threadId);
     init();  
   });
+
+  function init() {
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          choices: [
+            "Add departments, roles or employees",
+            "View departments, roles or employees",
+            "Update departments, roles or employees",
+            "Exit",
+          ],
+          name: "action",
+          message: "What would you like to do?",
+        },
+      ])
+      .then(({ action }) => {
+        if (action === "Add departments, roles or employees") {
+          addToDB();
+        } else if (action === "View departments, roles or employees") {
+          searchBySong();
+        } else if (action === "Update departments, roles or employees") {
+          searchForRepeats();
+        } else {
+          exit();
+        }
+      });
+  }
