@@ -154,6 +154,12 @@ function addRole(){
               type: "input",
               name: "lastName",
               message: "Enter the employee's Last Name:"
+          },
+          {
+            type: "list",
+            choices: rolesArray,
+            name: "title",
+            message: "Who is the employee's manager?"
           }
         ]).then((answer)=>{
           let role = dataRole.filter(
