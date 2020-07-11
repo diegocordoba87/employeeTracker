@@ -1,22 +1,27 @@
+DROP DATABASE IF EXISTS humanResources;
 CREATE DATABASE humanResources;
+USE humanResources;
 
 CREATE TABLE departments (
     id int AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50)
+    department_name VARCHAR(50)
 );
 
 CREATE TABLE roles (
 id INTEGER AUTO_INCREMENT PRIMARY KEY,
 title VARCHAR(50),
 salary DECIMAL,
-FOREIGN KEY department_id REFERENCES department(id)
-)
+department_id INT,
+FOREIGN KEY (department_id) REFERENCES departments(id)
+);
 
-CREATE TABLE employee (
+CREATE TABLE employees (
 id integer not null AUTO_INCREMENT PRIMARY KEY,
 first_name varchar(50),
 last_name VARCHAR(50),
-FOREIGN KEY role_id REFERENCES role(id),
-FOREIGN KEY (ManagerId) REFERENCES employee(Id);
+role_id INT,
+manager_id INT,
+FOREIGN KEY (role_id) REFERENCES roles(id),
+FOREIGN KEY (manager_id) REFERENCES employees(id)
 );
 
