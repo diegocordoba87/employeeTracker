@@ -192,8 +192,6 @@ function addEmployee() {
           name: role.title,
         };
       });
-      console.log(rolesArray);
-
       const employeesArray = employeesTable.map((employee) => {
         return {
           name: employee.first_name + " " + employee.last_name,
@@ -341,9 +339,7 @@ function viewByManager() {
             name: manager.first_name + " " + manager.last_name,
             value: manager.first_name,
           };
-        });
-        console.log(managersArray);
-  
+        });  
         inquirer
           .prompt([
             {
@@ -354,7 +350,6 @@ function viewByManager() {
             },
           ])
           .then((answer) => {
-              console.log(answer.manager)
             const queryString = `SELECT emp.id as "Employee ID", 
             concat(emp.first_name," ",emp.last_name) as "EMPLOYEE NAME", 
             r.id as "ROLE ID",
@@ -397,9 +392,7 @@ function updateEmployee() {
             name: role.title,
             value: role.id,            
           };
-        });
-        console.log(rolesArray);
-  
+        });  
         const employeesArray = employeesTable.map((employee) => {
           return {
             name: employee.first_name + " " + employee.last_name,
