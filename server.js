@@ -18,7 +18,6 @@ const connection = mysql.createConnection({
 connection.connect(function (err) {
   if (err) throw err;
   console.log("connected as id" + connection.threadId);
-  
 });
 init();
 
@@ -35,7 +34,6 @@ function init() {
           "Exit",
         ],
         name: "action",
-        
       },
     ])
     .then(({ action }) => {
@@ -45,8 +43,8 @@ function init() {
         viewDB();
       } else if (action === "Update departments, roles or employees") {
         updateDB();
-      } else if (action === "Exit"){
-        exit()
+      } else if (action === "Exit") {
+        exit();
       }
     });
 }
@@ -75,27 +73,32 @@ function addToDB() {
 }
 
 function viewDB() {
-    inquirer
-      .prompt([
-        {
-          type: "list",
-          choices: ["View the departments table", "View the roles table", "View the employees table", "Exit"],
-          name: "action",
-          message: "What would you like to do?",
-        },
-      ])
-      .then(({ action }) => {
-        if (action === "View the departments table") {
-          viewDept();
-        } else if (action === "View the roles table") {
-          viewRoles();
-        } else if (action === "View the employees table") {
-          viewEmployees();
-        } else {
-          exit();
-        }
-      });
-  }
+  inquirer
+    .prompt([
+      {
+        type: "list",
+        choices: [
+          "View the departments table",
+          "View the roles table",
+          "View the employees table",
+          "Exit",
+        ],
+        name: "action",
+        message: "What would you like to do?",
+      },
+    ])
+    .then(({ action }) => {
+      if (action === "View the departments table") {
+        viewDept();
+      } else if (action === "View the roles table") {
+        viewRoles();
+      } else if (action === "View the employees table") {
+        viewEmployees();
+      } else {
+        exit();
+      }
+    });
+}
 
 function addDept() {
   inquirer
@@ -111,9 +114,12 @@ function addDept() {
         "INSERT INTO departments (department_name) VALUES (?);";
       connection.query(queryString, [newDept], function (err, data) {
         if (err) throw err;
-        console.log(newDept + "has been added!");
-        viewDept();
-        addMore();
+        const queryString = `SELECT id as ID, department_name as DEPARTMENT FROM departments`;
+        connection.query(queryString, function (err, data) {
+          if (err) throw err;
+          console.table(data);
+          addMore();
+        });
       });
     });
 }
@@ -153,9 +159,13 @@ function addRole() {
           [answer.title, answer.salary, department[0].id],
           function (err, data) {
             if (err) throw err;
-            console.log(`${answer.title} has been added!`)
-            viewRoles();
-            addMore();
+            const queryString =
+              'SELECT id as ID, title as TITLE, salary as SALARY, department_id as "DEPARTMENT ID" FROM roles';
+            connection.query(queryString, function (err, data) {
+              if (err) throw err;
+              console.table(data);
+              addMore();
+            });
           }
         );
       });
@@ -163,65 +173,62 @@ function addRole() {
 }
 
 function addEmployee() {
-    const selectEmployees = "SELECT * FROM employees";
-    const selectRoles = "SELECT * FROM roles";
-  
-    connection.query(selectEmployees, function (err, employeesTable) {
+  const selectEmployees = "SELECT * FROM employees";
+  const selectRoles = "SELECT * FROM roles";
+
+  connection.query(selectEmployees, function (err, employeesTable) {
+    if (err) throw err;
+
+    connection.query(selectRoles, function (err, rolesTable) {
       if (err) throw err;
-  
-      connection.query(selectRoles, function (err, rolesTable) {
-  
-        if (err) throw err;
-        const rolesArray = rolesTable.map((role) => {
-          return {
-            value: role.id,
-            name: role.title,            
-          };
-        });
-        console.log(rolesArray);
-  
-        const employeesArray = employeesTable.map((employee) => {
-          return {
-            name: employee.first_name + " " + employee.last_name,
-            value: employee.id,
-          };
-        });
-  
-        inquirer
-          .prompt([
-            {
-              type: "list",
-              choices: rolesArray,
-              name: "title",
-              message: "Which role will this new employee have?",
-            },
-            {
-              type: "input",
-              name: "name",
-              message: "Enter the employee's First Name:",
-            },
-            {
-              type: "input",
-              name: "lastName",
-              message: "Enter the employee's Last Name:",
-            },
-            {
-              type: "list",
-              choices: employeesArray,
-              name: "manager",
-              message: "Who will be the employee's manager?",
-            },
-          ])
-          .then((answer) => {
-             const queryString =
-             `INSERT INTO employees (first_name, last_name, role_id, manager_id) values (?, ?, ?,?)`;
-            connection.query(
-              queryString,
-              [answer.name, answer.lastName, answer.title, answer.manager],
-              function (err, data) {
-                if (err) throw err;
-                const queryString =
-                `SELECT emp.id as "EMPLOYEE ID", 
+      const rolesArray = rolesTable.map((role) => {
+        return {
+          value: role.id,
+          name: role.title,
+        };
+      });
+      console.log(rolesArray);
+
+      const employeesArray = employeesTable.map((employee) => {
+        return {
+          name: employee.first_name + " " + employee.last_name,
+          value: employee.id,
+        };
+      });
+
+      inquirer
+        .prompt([
+          {
+            type: "list",
+            choices: rolesArray,
+            name: "title",
+            message: "Which role will this new employee have?",
+          },
+          {
+            type: "input",
+            name: "name",
+            message: "Enter the employee's First Name:",
+          },
+          {
+            type: "input",
+            name: "lastName",
+            message: "Enter the employee's Last Name:",
+          },
+          {
+            type: "list",
+            choices: employeesArray,
+            name: "manager",
+            message: "Who will be the employee's manager?",
+          },
+        ])
+        .then((answer) => {
+          const queryString = `INSERT INTO employees (first_name, last_name, role_id, manager_id) values (?, ?, ?,?)`;
+          connection.query(
+            queryString,
+            [answer.name, answer.lastName, answer.title, answer.manager],
+            function (err, data) {
+              if (err) throw err;
+              const queryString = `SELECT emp.id as "EMPLOYEE ID", 
                 concat(emp.first_name," ",emp.last_name) as "EMPLOYEE NAME", 
                 r.id as "ROLE ID",
                 r.title as TITLE,
@@ -237,21 +244,17 @@ function addEmployee() {
                 join departments dept
                 on r.department_id = dept.id
                 order by emp.id`;
-                  connection.query(queryString, function (err, data) {
-                    if (err) throw err;
-                    console.table(data);
-                    addMore();
-            })                              
-              }
-            );
-          });
-      }
-    );
+              connection.query(queryString, function (err, data) {
+                if (err) throw err;
+                console.table(data);
+                addMore();
+              });
+            }
+          );
+        });
+    });
   });
 }
-
-
-                  
 
 function addMore() {
   inquirer
@@ -272,29 +275,27 @@ function addMore() {
     });
 }
 
-function viewDept(){
-    const queryString =
-        `SELECT id as ID, department_name as DEPARTMENT FROM departments`;
-      connection.query(queryString, function (err, data) {
-        if (err) throw err;
-        console.table(data);
-        addMore();
-})
+function viewDept() {
+  const queryString = `SELECT id as ID, department_name as DEPARTMENT FROM departments`;
+  connection.query(queryString, function (err, data) {
+    if (err) throw err;
+    console.table(data);
+    addMore();
+  });
 }
 
-function viewRoles(){
-    const queryString =
-        'SELECT id as ID, title as TITLE, salary as SALARY, department_id as "DEPARTMENT ID" FROM roles';
-      connection.query(queryString, function (err, data) {
-        if (err) throw err;
-        console.table(data);
-        addMore();
-})
+function viewRoles() {
+  const queryString =
+    'SELECT id as ID, title as TITLE, salary as SALARY, department_id as "DEPARTMENT ID" FROM roles';
+  connection.query(queryString, function (err, data) {
+    if (err) throw err;
+    console.table(data);
+    addMore();
+  });
 }
 
-function viewEmployees(){
-    const queryString =
-    `SELECT emp.id as "EMPLOYEE ID", 
+function viewEmployees() {
+  const queryString = `SELECT emp.id as "EMPLOYEE ID", 
     concat(emp.first_name," ",emp.last_name) as "EMPLOYEE NAME", 
     r.id as "ROLE ID",
     r.title as TITLE,
@@ -310,14 +311,13 @@ function viewEmployees(){
     join departments dept
     on r.department_id = dept.id
     order by emp.id`;
-      connection.query(queryString, function (err, data) {
-        if (err) throw err;
-        console.table(data);
-        addMore();
-})
+  connection.query(queryString, function (err, data) {
+    if (err) throw err;
+    console.table(data);
+    addMore();
+  });
 }
 
-
-function exit(){
-    connection.end()
+function exit() {
+  connection.end();
 }
