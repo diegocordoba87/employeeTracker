@@ -18,8 +18,9 @@ const connection = mysql.createConnection({
 connection.connect(function (err) {
   if (err) throw err;
   console.log("connected as id" + connection.threadId);
+  init();
 });
-init();
+
 
 function init() {
   inquirer
@@ -30,7 +31,7 @@ function init() {
         choices: [
           "Add departments, roles or employees",
           "View departments, roles or employees",
-          "Update departments, roles or employees",
+          "Update an employee's role",
           "Exit",
         ],
         name: "action",
@@ -41,8 +42,8 @@ function init() {
         addToDB();
       } else if (action === "View departments, roles or employees") {
         viewDB();
-      } else if (action === "Update departments, roles or employees") {
-        updateDB();
+      } else if (action === "Update an employee's role") {
+        updateEmployee();
       } else if (action === "Exit") {
         exit();
       }
@@ -322,10 +323,6 @@ function viewEmployees() {
   });
 }
 
-function exit() {
-  connection.end();
-}
-
 function viewByManager() {
     const selectManagers = `SELECT 
     DISTINCT
@@ -384,5 +381,86 @@ function viewByManager() {
             );
           });
       ;
-    }
+}
+
+function updateEmployee() {
+    const selectEmployees = "SELECT * FROM employees";
+    const selectRoles = "SELECT * FROM roles";
+  
+    connection.query(selectEmployees, function (err, employeesTable) {
+      if (err) throw err;
+  
+      connection.query(selectRoles, function (err, rolesTable) {
+        if (err) throw err;
+        const rolesArray = rolesTable.map((role) => {
+          return {
+            name: role.title,
+            value: role.id,            
+          };
+        });
+        console.log(rolesArray);
+  
+        const employeesArray = employeesTable.map((employee) => {
+          return {
+            name: employee.first_name + " " + employee.last_name,
+            value: employee.id,
+          };
+        });
+  
+        inquirer
+          .prompt([
+            {
+                type: "list",
+                choices: employeesArray,
+                name: "empid",
+                message: "Which employee's role do you want to update?",
+              },
+            {
+              type: "list",
+              choices: rolesArray,
+              name: "role",
+              message: "Which role will this employee have from now on?",
+            },
+            
+          ])
+          .then((answer) => {
+            const queryString = `UPDATE employees SET role_id = ? WHERE (id = ?)`;
+            connection.query(
+              queryString, [answer.role, answer.empid],
+              function (err, data) {
+                if (err) throw err;
+                const queryString = `SELECT emp.id as "EMPLOYEE ID", 
+                  concat(emp.first_name," ",emp.last_name) as "EMPLOYEE NAME", 
+                  r.id as "ROLE ID",
+                  r.title as TITLE,
+                  dept.department_name DEPARTMENT,
+                  mgr.id as "MANAGER ID", 
+                  concat(mgr.first_name, " ", 
+                  mgr.last_name) as "MANAGER NAME"
+                  from employees emp
+                  left join employees mgr
+                  on emp.manager_id = mgr.id
+                  join roles r
+                  on emp.role_id = r.id
+                  join departments dept
+                  on r.department_id = dept.id
+                  where emp.id = ?
+                  order by emp.id`;
+                connection.query(queryString,[answer.empid], function (err, data) {
+                  if (err) throw err;
+                  console.table(data);
+                  addMore();
+                });
+              }
+            );
+          });
+      });
+    });
+  }
+
+function exit() {
+  connection.end();
+}
+
+
 
