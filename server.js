@@ -81,6 +81,7 @@ function viewDB() {
           "View the departments table",
           "View the roles table",
           "View the employees table",
+          "View employees by manager",
           "Exit",
         ],
         name: "action",
@@ -94,11 +95,14 @@ function viewDB() {
         viewRoles();
       } else if (action === "View the employees table") {
         viewEmployees();
+      } else if (action === "View employees by manager") {
+        viewByManager();
       } else {
         exit();
       }
     });
 }
+
 
 function addDept() {
   inquirer
@@ -321,3 +325,64 @@ function viewEmployees() {
 function exit() {
   connection.end();
 }
+
+function viewByManager() {
+    const selectManagers = `SELECT 
+    DISTINCT
+        emp.manager_id,
+        mgr.id as "MANAGER ID", 
+        mgr.first_name, 
+        mgr.last_name
+        from employees emp
+        right join employees mgr
+        on emp.manager_id = mgr.id;`;
+  
+    connection.query(selectManagers, function (err, managersTable) {
+      if (err) throw err;
+        const managersArray = managersTable.map((manager) => {
+          return {
+            name: manager.first_name + " " + manager.last_name,
+            value: manager.first_name,
+          };
+        });
+        console.log(managersArray);
+  
+        inquirer
+          .prompt([
+            {
+              type: "list",
+              choices: managersArray,
+              name: "manager",
+              message: "Which manager's employees would you like to see?",
+            },
+          ])
+          .then((answer) => {
+              console.log(answer.manager)
+            const queryString = `SELECT emp.id as "Employee ID", 
+            concat(emp.first_name," ",emp.last_name) as "EMPLOYEE NAME", 
+            r.id as "ROLE ID",
+            r.title as TITLE,
+            dept.department_name DEPARTMENT,
+            mgr.id as "MANAGER ID", 
+            concat(mgr.first_name, " ", 
+            mgr.last_name) as "MANAGER NAME"
+            from employees emp
+            left join employees mgr
+            on emp.manager_id = mgr.id
+            join roles r
+            on emp.role_id = r.id
+            join departments dept
+            on r.department_id = dept.id
+            WHERE mgr.first_name = ?
+            order by emp.id;`
+            connection.query(queryString,[answer.manager],function (err, data) {
+                if (err) throw err;
+                  console.table(data);
+                  addMore();
+                });
+              }
+            );
+          });
+      ;
+    }
+
